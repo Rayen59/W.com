@@ -256,25 +256,35 @@
     }
     .fab:active { transform: scale(0.9); }
 
-    /* ===== BOTTOM NAV ===== */
+    /* ===== BOTTOM NAV (beautiful, at the bottom) ===== */
     .bottom-nav {
       display: flex;
       background: var(--bg-surface);
       border-top: 1px solid var(--border-subtle);
       flex-shrink: 0;
+      padding: 6px 0 8px;
+      backdrop-filter: blur(10px);
     }
     .bn-item {
       flex: 1;
       text-align: center;
-      padding: 10px 0 8px;
+      padding: 6px 0 4px;
       font-size: 11px;
       color: var(--text-dim);
-      display: flex; flex-direction: column; align-items: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       gap: 2px;
       transition: var(--transition);
+      border-radius: 16px;
+      margin: 0 4px;
+      padding: 8px 0;
     }
-    .bn-item.active { color: var(--accent); }
-    .bn-ic { font-size: 22px; }
+    .bn-item.active {
+      color: var(--accent);
+      background: rgba(91, 140, 255, 0.08);
+    }
+    .bn-ic { font-size: 24px; line-height: 1; }
 
     /* ===== CHAT SCREEN ===== */
     #chatScreen {
@@ -363,7 +373,7 @@
 
     .typing-indicator { padding: 4px 18px; font-size: 12px; color: var(--accent); font-style: italic; height: 22px; }
 
-    /* ===== ANALYTICS SCREEN (replaces reels) ===== */
+    /* ===== ANALYTICS SCREEN ===== */
     #analyticsScreen {
       position: absolute; inset: 0;
       background: var(--bg-primary);
@@ -550,8 +560,8 @@
     <div class="list-body" id="listBody"></div>
     <div class="fab" onclick="fabAction()">＋</div>
     <div class="bottom-nav">
-      <div class="bn-item active" onclick="switchMainScreen('list')"><span class="bn-ic">💬</span>Chats</div>
-      <div class="bn-item" onclick="switchMainScreen('analytics')"><span class="bn-ic">📊</span>Analytics</div>
+      <div class="bn-item active" onclick="switchMainScreen('list')"><span class="bn-ic">💬</span><span>Chats</span></div>
+      <div class="bn-item" onclick="switchMainScreen('analytics')"><span class="bn-ic">📊</span><span>Analytics</span></div>
     </div>
   </div>
 
@@ -579,8 +589,8 @@
       <div id="alertContainer"></div>
     </div>
     <div class="bottom-nav" style="position:sticky;bottom:0;background:var(--bg-surface);margin-top:auto;">
-      <div class="bn-item" onclick="switchMainScreen('list')"><span class="bn-ic">💬</span>Chats</div>
-      <div class="bn-item active" onclick="switchMainScreen('analytics')"><span class="bn-ic">📊</span>Analytics</div>
+      <div class="bn-item" onclick="switchMainScreen('list')"><span class="bn-ic">💬</span><span>Chats</span></div>
+      <div class="bn-item active" onclick="switchMainScreen('analytics')"><span class="bn-ic">📊</span><span>Analytics</span></div>
     </div>
   </div>
 
@@ -781,12 +791,12 @@ function switchMainScreen(screen){
   if (screen === "list") {
     list.classList.remove("hidden");
     analytics.classList.add("hidden");
-    document.querySelector(".bn-item:first-child").classList.add("active");
+    document.querySelectorAll(".bn-item")[0].classList.add("active");
     loadList();
   } else {
     list.classList.add("hidden");
     analytics.classList.remove("hidden");
-    document.querySelector(".bn-item:last-child").classList.add("active");
+    document.querySelectorAll(".bn-item")[1].classList.add("active");
     renderAnalytics();
   }
 }

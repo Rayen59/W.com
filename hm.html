@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -256,10 +257,19 @@
     }
     .fab:active { transform: scale(0.9); }
 
+    /* ===== LIST SCREEN - ensures bottom nav stays at bottom ===== */
+    #listScreen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
     /* ===== BOTTOM NAV - CLEAR, BEAUTIFUL, AT THE VERY BOTTOM ===== */
     .bottom-nav {
       display: flex;
-      background: rgba(19, 27, 46, 0.85);
+      background: rgba(19, 27, 46, 0.92);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border-top: 1px solid rgba(255,255,255,0.06);
@@ -269,6 +279,7 @@
       bottom: 0;
       z-index: 10;
       box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+      margin-top: auto;
     }
     .bn-item {
       flex: 1;
@@ -571,7 +582,7 @@
     <div class="list-body" id="listBody"></div>
     <div class="fab" onclick="fabAction()">＋</div>
     
-    <!-- BOTTOM NAV - CLEAR, AT THE BOTTOM -->
+    <!-- BOTTOM NAV - FIXED AT THE VERY BOTTOM -->
     <div class="bottom-nav">
       <div class="bn-item active" onclick="switchMainScreen('list')">
         <span class="bn-ic">💬</span>
@@ -607,7 +618,7 @@
       </div>
       <div id="alertContainer"></div>
     </div>
-    <!-- BOTTOM NAV - CLEAR, AT THE BOTTOM -->
+    <!-- BOTTOM NAV - FIXED AT THE VERY BOTTOM -->
     <div class="bottom-nav" style="position:sticky;bottom:0;margin-top:auto;">
       <div class="bn-item" onclick="switchMainScreen('list')">
         <span class="bn-ic">💬</span>
@@ -1855,3 +1866,4 @@ function toggleCamera(){ if (!localStream) return; isCameraOff = !isCameraOff; l
 </script>
 </body>
 </html>
+```

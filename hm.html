@@ -143,6 +143,15 @@
     .auth-switch span { color: var(--accent); font-weight: 600; cursor: pointer; }
     .auth-error { background: rgba(255, 107, 122, 0.12); color: var(--danger); padding: 12px 16px; border-radius: 14px; font-size: 13px; text-align: center; margin-bottom: 16px; border: 1px solid rgba(255, 107, 122, 0.15); position: relative; z-index: 1; }
 
+    /* ===== LIST SCREEN LAYOUT ===== */
+    #listScreen {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
     /* ===== APP BAR ===== */
     .appbar {
       display: flex; align-items: center; gap: 10px;
@@ -1751,84 +1760,4 @@ async function openSettings(){
     <div class="sheet-item" style="color:var(--danger);" onclick="openDeleteAccountSheet()"><span class="ic">⚠️</span> Delete account</div>`;
   overlay.appendChild(sheet);
   document.getElementById("app").appendChild(overlay);
-  document.getElementById("avatarUpload").onchange = async (e) => { const fd = new FormData(); fd.append("avatar", e.target.files[0]); const r = await api("/api/profile", {method:"POST", body: fd}); ME = r.user; saveSession(); document.getElementById("settingsAvatar").innerHTML = avatarInner(ME); setAvatarEl(document.getElementById("myAvatar"), ME); };
-}
-function toggleAnimations(){ ANIMATIONS_ON = !ANIMATIONS_ON; localStorage.setItem("wg_animations", ANIMATIONS_ON ? "on" : "off"); const toggle = document.querySelector(".toggle-switch"); if (toggle) toggle.classList.toggle("on", ANIMATIONS_ON); }
-async function saveProfile(){ const username = document.getElementById("settingsUsername").value.trim(); const fd = new FormData(); fd.append("username", username); const r = await api("/api/profile", {method:"POST", body: fd}); ME = r.user; saveSession(); setAvatarEl(document.getElementById("myAvatar"), ME); showToast("Profile updated"); document.querySelector(".overlay")?.remove(); }
-function openDeleteAccountSheet(){ document.querySelector(".overlay")?.remove(); const overlay = document.createElement("div"); overlay.className = "overlay"; overlay.onclick = (e) => { if (e.target===overlay) overlay.remove(); }; const sheet = document.createElement("div"); sheet.className = "sheet"; sheet.innerHTML = `<h2 style="color:var(--danger);">Delete account</h2><div class="settings-row desc" style="border:none;line-height:1.6;padding:0 0 16px;color:var(--text-dim);font-size:13px;">This permanently deletes your account and everything you've posted — messages, reels, comments and reactions. This cannot be undone: your old email and password will stop working immediately, and the only way to use Wavegram again is signing up as a brand new account. Nobody will be able to message you either, because the account will no longer exist.</div><div class="field"><label>Confirm your password</label><input type="password" id="deleteAccountPassword" placeholder="••••••••"></div><button class="btn-primary" style="background:var(--danger);box-shadow:none;" onclick="confirmDeleteAccount()"><span>Permanently delete my account</span></button>`; overlay.appendChild(sheet); document.getElementById("app").appendChild(overlay); }
-async function confirmDeleteAccount(){ const password = document.getElementById("deleteAccountPassword").value; if (!password) { showToast("Enter your password to confirm"); return; } try { await api("/api/account", {method:"DELETE", body: JSON.stringify({password})}); document.querySelector(".overlay")?.remove(); showToast("Account deleted"); localStorage.removeItem("wg_token"); localStorage.removeItem("wg_me"); TOKEN = ""; ME = null; if (socket) socket.disconnect(); if (activityInterval) clearInterval(activityInterval); showAuth(); } catch(e){ showToast(e.message); } }
-async function viewBlockedList(){ document.querySelector(".overlay")?.remove(); const r = await api("/api/blocked"); const overlay = document.createElement("div"); overlay.className = "overlay"; overlay.onclick = (e) => { if (e.target===overlay) overlay.remove(); }; const sheet = document.createElement("div"); sheet.className = "sheet"; let html = "<h2>Blocked users</h2>"; if (!r.users || r.users.length===0) html += "<div class='empty-state'>No blocked users</div>"; if (r.users) { r.users.forEach(u => { html += `<div class="sheet-item">${escapeHtml(u.username)}<button style="margin-left:auto;color:var(--accent);font-size:13px;" onclick="unblockUser(${u.id})">Unblock</button></div>`; }); } sheet.innerHTML = html; overlay.appendChild(sheet); document.getElementById("app").appendChild(overlay); }
-async function unblockUser(id){ await api("/api/unblock", {method:"POST", body: JSON.stringify({user_id:id})}); viewBlockedList(); }
-function showToast(msg){ const t = document.createElement("div"); t.className = "toast"; t.textContent = msg; document.getElementById("app").appendChild(t); setTimeout(() => t.remove(), 2800); }
-
-// ---- Join-via-link ----
-window.addEventListener("load", () => {
-  const params = new URLSearchParams(window.location.search);
-  const joinToken = params.get("join");
-  if (joinToken && TOKEN) setTimeout(() => promptJoinGroup(joinToken), 600);
-  else if (joinToken) localStorage.setItem("wg_pending_join", joinToken);
-});
-function promptJoinGroup(token){ const overlay = document.createElement("div"); overlay.className = "overlay"; const sheet = document.createElement("div"); sheet.className = "sheet"; sheet.innerHTML = `<h2>Join group</h2><div class="field"><label>Group password (if any)</label><input type="password" id="joinPass"></div><button class="btn-primary" onclick="submitJoinGroup('${token}')"><span>Join</span></button>`; overlay.appendChild(sheet); document.getElementById("app").appendChild(overlay); }
-async function submitJoinGroup(token){ const password = document.getElementById("joinPass").value; try { await api("/api/groups/join/"+token, {method:"POST", body: JSON.stringify({password})}); document.querySelector(".overlay")?.remove(); showToast("Joined group"); switchTab("groups"); } catch(e){ showToast(e.message); } }
-
-// ==================== CALLS (WebRTC) - FIXED ====================
-let pc = null;
-let localStream = null;
-let remoteStream = null;
-let currentCallTargetId = null;
-let isVideoCall = false;
-let isMuted = false;
-let isCameraOff = false;
-let callStartTime = null;
-let callTimerInterval = null;
-let isCallActive = false;
-let callRecordSaved = false;
-
-const rtcConfig = { iceServers: [ { urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }, { urls: "stun:stun2.l.google.com:19302" }, { urls: "stun:stun3.l.google.com:19302" }, { urls: "stun:stun4.l.google.com:19302" } ], iceCandidatePoolSize: 10 };
-
-async function startCall(type){
-  console.log("🔵 startCall called with type:", type);
-  if (!window.isSecureContext) { showToast("Calls require HTTPS or localhost"); return; }
-  if (!currentChat || currentChat.type !== "dm") { showToast("Only direct messages support calls"); return; }
-  if (isCallActive) { showToast("Already in a call"); return; }
-  if (!socket || !socket.connected) { showToast("Not connected to server"); return; }
-  isVideoCall = (type === "video");
-  currentCallTargetId = currentChat.id;
-  callStartTime = Date.now();
-  callRecordSaved = false;
-  isCallActive = true;
-  document.getElementById("callActionsIncoming").classList.add("hidden");
-  document.getElementById("callActionsActive").classList.remove("hidden");
-  document.getElementById("callOverlay").classList.remove("hidden");
-  document.getElementById("callStatus").textContent = "Calling...";
-  document.getElementById("callName").textContent = currentChat.name;
-  setCallAvatarEl(document.getElementById("callAvatar"), {username: currentChat.name, avatar: currentChat.avatar});
-  try {
-    const constraints = { audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: isVideoCall ? { width: { ideal: 640 }, height: { ideal: 480 } } : false };
-    localStream = await navigator.mediaDevices.getUserMedia(constraints);
-    const lv = document.getElementById("localVideo");
-    if (isVideoCall) { lv.srcObject = localStream; lv.classList.remove("hidden"); } else { lv.classList.add("hidden"); }
-    createPeerConnection();
-    localStream.getTracks().forEach(track => { if (pc) { pc.addTrack(track, localStream); } });
-    const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: isVideoCall });
-    await pc.setLocalDescription(offer);
-    socket.emit("call_offer", { target: currentCallTargetId, offer: offer, video: isVideoCall });
-    startCallTimer();
-  } catch(err){ console.error("Error starting call:", err); showToast("Could not start call: " + err.message); endCall(true); }
-}
-function startCallTimer() { if (callTimerInterval) clearInterval(callTimerInterval); callTimerInterval = setInterval(() => { if (callStartTime) { const elapsed = Math.floor((Date.now() - callStartTime) / 1000); const mins = Math.floor(elapsed / 60); const secs = elapsed % 60; document.getElementById("callStatus").textContent = `${mins}:${secs.toString().padStart(2, '0')}`; } }, 1000); }
-async function handleCallOffer(data){ console.log("📥 Call offer received from:", data.from_user_id); if (isCallActive || currentCallTargetId) { socket.emit("call_reject", {target: data.from_user_id}); return; } if (!data.from_user_id) return; currentCallTargetId = data.from_user_id; isVideoCall = data.video || false; callStartTime = Date.now(); callRecordSaved = false; isCallActive = true; const user = {username: data.from_username || "Unknown", avatar: data.from_avatar || null}; setCallAvatarEl(document.getElementById("callAvatar"), user); document.getElementById("callName").textContent = user.username; document.getElementById("callStatus").textContent = isVideoCall ? "📹 Incoming video call..." : "📞 Incoming voice call..."; document.getElementById("callActionsIncoming").classList.remove("hidden"); document.getElementById("callActionsActive").classList.add("hidden"); document.getElementById("callOverlay").classList.remove("hidden"); window._incomingOffer = data.offer; window._callerInfo = user; if (navigator.vibrate) navigator.vibrate([200, 100, 200]); }
-async function acceptCall(){ console.log("✅ Accepting call"); if (!window._incomingOffer) { showToast("No incoming call to accept"); return; } document.getElementById("callActionsIncoming").classList.add("hidden"); document.getElementById("callActionsActive").classList.remove("hidden"); document.getElementById("callStatus").textContent = "Connecting..."; try { const constraints = { audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: isVideoCall ? { width: { ideal: 640 }, height: { ideal: 480 } } : false }; localStream = await navigator.mediaDevices.getUserMedia(constraints); const lv = document.getElementById("localVideo"); if (isVideoCall) { lv.srcObject = localStream; lv.classList.remove("hidden"); } else { lv.classList.add("hidden"); } createPeerConnection(); localStream.getTracks().forEach(track => { if (pc) { pc.addTrack(track, localStream); } }); await pc.setRemoteDescription(new RTCSessionDescription(window._incomingOffer)); const answer = await pc.createAnswer(); await pc.setLocalDescription(answer); socket.emit("call_answer", {target: currentCallTargetId, answer: answer}); startCallTimer(); trackActivity('call'); } catch(err){ console.error("Error accepting call:", err); showToast("Failed to accept call: " + err.message); endCall(true); } }
-async function handleCallAnswer(data){ if (!pc) return; try { await pc.setRemoteDescription(new RTCSessionDescription(data.answer)); document.getElementById("callStatus").textContent = "Connected"; startCallTimer(); } catch(e){ console.error("Error handling call answer:", e); } }
-async function handleRemoteIce(data){ if (!pc || !data.candidate) return; try { await pc.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch(e){ console.warn("Failed to add ICE candidate:", e); } }
-function handleCallReject(data){ showToast("Call declined"); if (!callRecordSaved) { saveCallRecord("declined"); callRecordSaved = true; } endCall(true); }
-function handleRemoteEnd(data){ showToast("Call ended"); if (!callRecordSaved && callStartTime) { saveCallRecord("completed"); callRecordSaved = true; } endCall(true); }
-function declineCall(){ if (currentCallTargetId) socket.emit("call_reject", {target: currentCallTargetId}); if (!callRecordSaved) { saveCallRecord("declined"); callRecordSaved = true; } endCall(true); }
-function endCall(silent){ if (callTimerInterval) { clearInterval(callTimerInterval); callTimerInterval = null; } if (!silent && currentCallTargetId && isCallActive) { socket.emit("call_end", {target: currentCallTargetId}); if (!callRecordSaved && callStartTime) { saveCallRecord("completed"); callRecordSaved = true; } } if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; } if (pc) { pc.close(); pc = null; } currentCallTargetId = null; isCallActive = false; callStartTime = null; document.getElementById("callOverlay").classList.add("hidden"); document.getElementById("remoteVideo").classList.add("hidden"); document.getElementById("localVideo").classList.add("hidden"); document.getElementById("cameraBtn").classList.add("hidden"); }
-function saveCallRecord(status) { if (!currentChat || currentChat.type !== "dm") return; const callType = isVideoCall ? "video" : "audio"; const duration = callStartTime ? Math.floor((Date.now() - callStartTime) / 1000) : 0; const content = `${callType}:${status}:${duration}`; const clientId = makeClientId(); const m = { id: clientId, chat_type: "dm", chat_id: null, sender_id: ME.id, sender_name: ME.username, sender_avatar: ME.avatar, msg_type: "call", content: content, media_path: "", timestamp: Date.now()/1000, deleted: false, reactions: [], client_id: clientId }; const body = document.getElementById("messagesBody"); if (body) { const row = buildBubble(m); row.classList.add("pending"); row.dataset.id = clientId; body.appendChild(row); body.scrollTop = body.scrollHeight; } socket.emit("send_message", { chat_type: "dm", target: currentChat.id, msg_type: "call", content: content, client_id: clientId, reply_to_id: null }); trackMessageType('call'); trackActivity('call'); }
-function createPeerConnection(){ pc = new RTCPeerConnection(rtcConfig); pc.onicecandidate = (event) => { if (event.candidate && currentCallTargetId && socket) { socket.emit("call_ice_candidate", {target: currentCallTargetId, candidate: event.candidate}); } }; pc.ontrack = (event) => { remoteStream = event.streams[0]; const rv = document.getElementById("remoteVideo"); rv.srcObject = remoteStream; rv.classList.remove("hidden"); document.getElementById("callStatus").textContent = "Connected"; document.getElementById("cameraBtn").classList.toggle("hidden", !isVideoCall); }; pc.oniceconnectionstatechange = () => { const state = pc?.iceConnectionState; if (state === "failed") { showToast("Connection failed"); if (!callRecordSaved) { saveCallRecord("missed"); callRecordSaved = true; } endCall(true); } if (state === "connected") document.getElementById("callStatus").textContent = "Connected"; if (state === "disconnected") { showToast("Disconnected"); if (!callRecordSaved) { saveCallRecord("missed"); callRecordSaved = true; } endCall(true); } }; }
-function toggleMute(){ if (!localStream) return; isMuted = !isMuted; localStream.getAudioTracks().forEach(t => t.enabled = !isMuted); const btn = document.getElementById("muteBtn"); btn.classList.toggle("active-toggle", isMuted); btn.textContent = isMuted ? "🔇" : "🎤"; }
-function toggleCamera(){ if (!localStream) return; isCameraOff = !isCameraOff; localStream.getVideoTracks().forEach(t => t.enabled = !isCameraOff); const btn = document.getElementById("cameraBtn"); btn.classList.toggle("active-toggle", isCameraOff); btn.textContent = isCameraOff ? "🎦" : "📷"; }
-</script>
-</body>
-</html>
+  document.getElementById("avatarUpload").onchange = async (e) => { const fd = new FormData(); fd.append("avatar", e.target.files[0]); const r = await api("/api/profile", {method:"POST", body: fd}); ME = r.user; saveSession(); document.getElementById("settingsAvatar").innerHTML = avatarInner(ME); setAvata

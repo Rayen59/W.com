@@ -3,128 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Wavegram · Chat & Analytics</title>
+  <title>Wavegram · Pro</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
   <style>
-    /* ============================================================
-       ROOT VARIABLES & THEMES (all 7 themes preserved)
-    ============================================================ */
+    /* ===== ROOT ===== */
     :root {
-      --bg-primary: #0c111b;
-      --bg-surface: #141c2b;
-      --bg-surface-2: #1c283c;
-      --bg-surface-3: #25344d;
-      --text-primary: #f0f4fa;
-      --text-secondary: #b2c9e8;
-      --text-dim: #7b94b8;
-      --accent: #4f9aff;
-      --accent-glow: rgba(79, 154, 255, 0.25);
-      --accent-gradient: linear-gradient(145deg, #4f9aff, #7c5cff);
-      --accent-gradient-hover: linear-gradient(145deg, #6aafff, #8c6eff);
-      --bubble-mine: #2b7fff;
-      --bubble-theirs: #1c283c;
+      --bg-primary: #0b0f1a;
+      --bg-surface: #131b2e;
+      --bg-surface-2: #1c2740;
+      --bg-surface-3: #2a3857;
+      --text-primary: #f0f4ff;
+      --text-secondary: #b0c8f0;
+      --text-dim: #6f8bb0;
+      --accent: #5b8cff;
+      --accent-glow: rgba(91, 140, 255, 0.25);
+      --accent-gradient: linear-gradient(135deg, #5b8cff, #a78bfa);
+      --bubble-mine: #4a7aff;
+      --bubble-theirs: #1c2740;
       --online: #34d399;
-      --danger: #ff5c7a;
-      --border-subtle: rgba(255, 255, 255, 0.04);
-      --shadow-card: 0 12px 40px rgba(0, 0, 0, 0.5);
+      --danger: #ff6b7a;
+      --border-subtle: rgba(255,255,255,0.05);
+      --shadow-card: 0 12px 48px rgba(0,0,0,0.5);
       --radius-card: 28px;
       --radius-bubble: 18px;
-      --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      --chat-bg: radial-gradient(ellipse at 20% 20%, rgba(79, 154, 255, 0.02), transparent 60%);
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      --chat-bg: radial-gradient(ellipse at 20% 20%, rgba(91, 140, 255, 0.03), transparent 60%);
     }
-    .theme-cosmic {
-      --bg-primary: #0a0a1a;
-      --bg-surface: #12122a;
-      --bg-surface-2: #1a1a3a;
-      --bg-surface-3: #2a2a4a;
-      --text-primary: #e8e0ff;
-      --text-secondary: #a090d0;
-      --text-dim: #7060a0;
-      --accent: #7c5cff;
-      --accent-glow: rgba(124, 92, 255, 0.3);
-      --accent-gradient: linear-gradient(145deg, #7c5cff, #4f9aff);
-      --bubble-mine: #5c3cdf;
-      --bubble-theirs: #1a1a3a;
-      --chat-bg: radial-gradient(ellipse at 20% 20%, rgba(124, 92, 255, 0.05), transparent 60%);
-    }
-    .theme-aurora {
-      --bg-primary: #0a1a1a;
-      --bg-surface: #0a2a2a;
-      --bg-surface-2: #0a3a3a;
-      --bg-surface-3: #1a4a4a;
-      --text-primary: #d0f0f0;
-      --text-secondary: #80c0c0;
-      --text-dim: #509090;
-      --accent: #34d399;
-      --accent-glow: rgba(52, 211, 153, 0.3);
-      --accent-gradient: linear-gradient(145deg, #34d399, #0ea5e9);
-      --bubble-mine: #1a8a7a;
-      --bubble-theirs: #0a2a2a;
-      --chat-bg: radial-gradient(ellipse at 20% 20%, rgba(52, 211, 153, 0.05), transparent 60%);
-    }
-    .theme-sunset {
-      --bg-primary: #1a0a0a;
-      --bg-surface: #2a1212;
-      --bg-surface-2: #3a1a1a;
-      --bg-surface-3: #4a2a2a;
-      --text-primary: #f0d0c0;
-      --text-secondary: #d09070;
-      --text-dim: #a06040;
-      --accent: #f472b6;
-      --accent-glow: rgba(244, 114, 182, 0.3);
-      --accent-gradient: linear-gradient(145deg, #f472b6, #fb923c);
-      --bubble-mine: #c05070;
-      --bubble-theirs: #2a1212;
-      --chat-bg: radial-gradient(ellipse at 20% 20%, rgba(244, 114, 182, 0.05), transparent 60%);
-    }
-    .theme-ocean {
-      --bg-primary: #0a0a1a;
-      --bg-surface: #0a1a2a;
-      --bg-surface-2: #0a2a3a;
-      --bg-surface-3: #1a3a4a;
-      --text-primary: #c0e0f0;
-      --text-secondary: #70a0c0;
-      --text-dim: #4070a0;
-      --accent: #0ea5e9;
-      --accent-glow: rgba(14, 165, 233, 0.3);
-      --accent-gradient: linear-gradient(145deg, #0ea5e9, #06b6d4);
-      --bubble-mine: #0a6a8a;
-      --bubble-theirs: #0a1a2a;
-      --chat-bg: radial-gradient(ellipse at 20% 20%, rgba(14, 165, 233, 0.05), transparent 60%);
-    }
-    .theme-sakura {
-      --bg-primary: #1a0a14;
-      --bg-surface: #2a1018;
-      --bg-surface-2: #3a1822;
-      --bg-surface-3: #4a202a;
-      --text-primary: #f0d0d8;
-      --text-secondary: #d090a0;
-      --text-dim: #a06070;
-      --accent: #f472b6;
-      --accent-glow: rgba(244, 114, 182, 0.3);
-      --accent-gradient: linear-gradient(145deg, #f472b6, #ec4899);
-      --bubble-mine: #c05080;
-      --bubble-theirs: #2a1018;
-      --chat-bg: radial-gradient(ellipse at 20% 20%, rgba(244, 114, 182, 0.05), transparent 60%);
-    }
-    .theme-midnight {
-      --bg-primary: #0a0a0a;
-      --bg-surface: #0a0a12;
-      --bg-surface-2: #12121a;
-      --bg-surface-3: #1a1a22;
-      --text-primary: #e0e0e8;
-      --text-secondary: #8888a0;
-      --text-dim: #505068;
-      --accent: #8b5cf6;
-      --accent-glow: rgba(139, 92, 246, 0.3);
-      --accent-gradient: linear-gradient(145deg, #8b5cf6, #6366f1);
-      --bubble-mine: #5b3cf6;
-      --bubble-theirs: #12121a;
-      --chat-bg: radial-gradient(ellipse at 20% 20%, rgba(139, 92, 246, 0.05), transparent 60%);
-    }
+    /* Themes (all 7) */
+    .theme-cosmic { --bg-primary: #080818; --bg-surface: #10102a; --bg-surface-2: #18183a; --bg-surface-3: #28284a; --text-primary: #e8e0ff; --text-secondary: #a090d0; --text-dim: #7060a0; --accent: #8b5cf6; --accent-gradient: linear-gradient(135deg, #8b5cf6, #4f9aff); --bubble-mine: #6d4aff; --bubble-theirs: #18183a; --chat-bg: radial-gradient(ellipse at 20% 20%, rgba(139,92,246,0.05), transparent 60%); }
+    .theme-aurora { --bg-primary: #081818; --bg-surface: #082828; --bg-surface-2: #083838; --bg-surface-3: #184848; --text-primary: #d0f0f0; --text-secondary: #80c0c0; --text-dim: #509090; --accent: #34d399; --accent-gradient: linear-gradient(135deg, #34d399, #0ea5e9); --bubble-mine: #1a8a7a; --bubble-theirs: #082828; --chat-bg: radial-gradient(ellipse at 20% 20%, rgba(52,211,153,0.05), transparent 60%); }
+    .theme-sunset { --bg-primary: #1a0808; --bg-surface: #2a1010; --bg-surface-2: #3a1818; --bg-surface-3: #4a2828; --text-primary: #f0d0c0; --text-secondary: #d09070; --text-dim: #a06040; --accent: #f472b6; --accent-gradient: linear-gradient(135deg, #f472b6, #fb923c); --bubble-mine: #c05070; --bubble-theirs: #2a1010; --chat-bg: radial-gradient(ellipse at 20% 20%, rgba(244,114,182,0.05), transparent 60%); }
+    .theme-ocean { --bg-primary: #08081a; --bg-surface: #08182a; --bg-surface-2: #08283a; --bg-surface-3: #18384a; --text-primary: #c0e0f0; --text-secondary: #70a0c0; --text-dim: #4070a0; --accent: #0ea5e9; --accent-gradient: linear-gradient(135deg, #0ea5e9, #06b6d4); --bubble-mine: #0a6a8a; --bubble-theirs: #08182a; --chat-bg: radial-gradient(ellipse at 20% 20%, rgba(14,165,233,0.05), transparent 60%); }
+    .theme-sakura { --bg-primary: #1a0814; --bg-surface: #2a1018; --bg-surface-2: #3a1822; --bg-surface-3: #4a202a; --text-primary: #f0d0d8; --text-secondary: #d090a0; --text-dim: #a06070; --accent: #f472b6; --accent-gradient: linear-gradient(135deg, #f472b6, #ec4899); --bubble-mine: #c05080; --bubble-theirs: #2a1018; --chat-bg: radial-gradient(ellipse at 20% 20%, rgba(244,114,182,0.05), transparent 60%); }
+    .theme-midnight { --bg-primary: #080808; --bg-surface: #080810; --bg-surface-2: #101018; --bg-surface-3: #181820; --text-primary: #e0e0e8; --text-secondary: #8888a0; --text-dim: #505068; --accent: #8b5cf6; --accent-gradient: linear-gradient(135deg, #8b5cf6, #6366f1); --bubble-mine: #5b3cf6; --bubble-theirs: #101018; --chat-bg: radial-gradient(ellipse at 20% 20%, rgba(139,92,246,0.05), transparent 60%); }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; }
@@ -142,21 +56,22 @@
       background: var(--bg-primary);
       display: flex;
       flex-direction: column;
-      box-shadow: 0 0 60px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 0 60px rgba(0,0,0,0.6);
       overflow: hidden;
+      position: relative;
     }
     .hidden { display: none !important; }
     button { font-family: inherit; cursor: pointer; border: none; outline: none; background: none; color: inherit; }
     input, textarea { font-family: inherit; outline: none; border: none; background: none; color: inherit; }
 
-    /* ----- AUTH SCREEN (unchanged) ----- */
+    /* ===== AUTH ===== */
     #authScreen {
       flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
       padding: 40px 30px;
-      background: radial-gradient(ellipse at 30% 20%, #162033, #0a0f18);
+      background: radial-gradient(ellipse at 30% 20%, #1a2640, #080c18);
       position: relative;
       overflow: hidden;
     }
@@ -164,7 +79,7 @@
       content: '';
       position: absolute;
       width: 300px; height: 300px;
-      background: radial-gradient(circle, rgba(79, 154, 255, 0.08) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(91, 140, 255, 0.08) 0%, transparent 70%);
       top: -80px; right: -80px;
       border-radius: 50%;
       animation: floatOrb 12s ease-in-out infinite alternate;
@@ -173,15 +88,12 @@
       content: '';
       position: absolute;
       width: 200px; height: 200px;
-      background: radial-gradient(circle, rgba(124, 92, 255, 0.06) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(167, 139, 250, 0.06) 0%, transparent 70%);
       bottom: -40px; left: -40px;
       border-radius: 50%;
       animation: floatOrb 16s ease-in-out infinite alternate-reverse;
     }
-    @keyframes floatOrb {
-      0% { transform: translate(0, 0) scale(1); }
-      100% { transform: translate(30px, 20px) scale(1.2); }
-    }
+    @keyframes floatOrb { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(30px,20px) scale(1.2); } }
     .auth-logo {
       width: 80px; height: 80px;
       border-radius: 24px;
@@ -191,7 +103,7 @@
       justify-content: center;
       font-size: 36px; font-weight: 800;
       margin: 0 auto 20px;
-      box-shadow: 0 12px 32px rgba(79, 154, 255, 0.35);
+      box-shadow: 0 12px 32px rgba(91, 140, 255, 0.35);
       position: relative;
       z-index: 1;
     }
@@ -207,7 +119,7 @@
       border-radius: 16px;
       font-size: 15px;
       border: 1.5px solid transparent;
-      transition: var(--transition-smooth);
+      transition: var(--transition);
       color: var(--text-primary);
     }
     .field input:focus { border-color: var(--accent); background: var(--bg-surface-2); box-shadow: 0 0 0 4px var(--accent-glow); }
@@ -219,8 +131,8 @@
       border-radius: 16px;
       font-size: 16px; font-weight: 700;
       color: #fff;
-      transition: var(--transition-smooth);
-      box-shadow: 0 6px 20px rgba(79, 154, 255, 0.3);
+      transition: var(--transition);
+      box-shadow: 0 6px 20px rgba(91, 140, 255, 0.3);
       position: relative;
       z-index: 1;
       overflow: hidden;
@@ -229,9 +141,9 @@
     .btn-primary span { position: relative; z-index: 2; }
     .auth-switch { text-align: center; margin-top: 20px; font-size: 14px; color: var(--text-secondary); position: relative; z-index: 1; }
     .auth-switch span { color: var(--accent); font-weight: 600; cursor: pointer; }
-    .auth-error { background: rgba(255, 92, 122, 0.12); color: var(--danger); padding: 12px 16px; border-radius: 14px; font-size: 13px; text-align: center; margin-bottom: 16px; border: 1px solid rgba(255, 92, 122, 0.15); position: relative; z-index: 1; }
+    .auth-error { background: rgba(255, 107, 122, 0.12); color: var(--danger); padding: 12px 16px; border-radius: 14px; font-size: 13px; text-align: center; margin-bottom: 16px; border: 1px solid rgba(255, 107, 122, 0.15); position: relative; z-index: 1; }
 
-    /* ----- APP BAR (unchanged) ----- */
+    /* ===== APP BAR ===== */
     .appbar {
       display: flex; align-items: center; gap: 10px;
       padding: 14px 18px;
@@ -245,7 +157,7 @@
       border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       font-size: 20px;
-      transition: var(--transition-smooth);
+      transition: var(--transition);
       background: rgba(255,255,255,0.03);
       position: relative;
     }
@@ -259,7 +171,7 @@
       border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
       padding: 0 5px;
-      box-shadow: 0 2px 8px rgba(255, 92, 122, 0.4);
+      box-shadow: 0 2px 8px rgba(255, 107, 122, 0.4);
     }
     .avatar {
       width: 40px; height: 40px;
@@ -272,7 +184,7 @@
       box-shadow: 0 2px 12px rgba(0,0,0,0.25);
     }
 
-    /* TABS (chats / people / groups) */
+    /* ===== TABS ===== */
     .tabs {
       display: flex;
       background: var(--bg-surface);
@@ -287,7 +199,7 @@
       font-size: 13px; font-weight: 600;
       color: var(--text-dim);
       border-bottom: 2.5px solid transparent;
-      transition: var(--transition-smooth);
+      transition: var(--transition);
     }
     .tab.active { color: var(--accent); border-color: var(--accent); }
 
@@ -299,7 +211,7 @@
       border-radius: 30px;
       font-size: 14px;
       border: 1.5px solid transparent;
-      transition: var(--transition-smooth);
+      transition: var(--transition);
       color: var(--text-primary);
     }
     .search-bar input:focus { border-color: var(--accent); background: var(--bg-surface-3); box-shadow: 0 0 0 4px var(--accent-glow); }
@@ -309,7 +221,7 @@
     .list-item {
       display: flex; align-items: center; gap: 14px;
       padding: 14px 18px;
-      transition: var(--transition-smooth);
+      transition: var(--transition);
       border-bottom: 1px solid var(--border-subtle);
     }
     .list-item:active { background: rgba(255,255,255,0.04); }
@@ -326,7 +238,7 @@
     .list-item-name { font-size: 16px; font-weight: 600; }
     .list-item-sub { font-size: 13px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .list-item-time { font-size: 11px; color: var(--text-dim); flex-shrink: 0; margin-top: 2px; }
-    .list-badge { background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; min-width: 20px; height: 20px; border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 0 6px; box-shadow: 0 2px 8px rgba(79, 154, 255, 0.3); }
+    .list-badge { background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; min-width: 20px; height: 20px; border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 0 6px; box-shadow: 0 2px 8px rgba(91, 140, 255, 0.3); }
     .empty-state { text-align: center; color: var(--text-dim); padding: 60px 30px; font-size: 14px; line-height: 1.7; }
     .empty-state i { display: block; font-size: 36px; margin-bottom: 16px; opacity: 0.4; }
 
@@ -338,13 +250,13 @@
       background: var(--accent-gradient);
       display: flex; align-items: center; justify-content: center;
       font-size: 28px;
-      box-shadow: 0 8px 28px rgba(79, 154, 255, 0.4);
+      box-shadow: 0 8px 28px rgba(91, 140, 255, 0.4);
       z-index: 5;
-      transition: var(--transition-smooth);
+      transition: var(--transition);
     }
     .fab:active { transform: scale(0.9); }
 
-    /* Bottom nav */
+    /* ===== BOTTOM NAV ===== */
     .bottom-nav {
       display: flex;
       background: var(--bg-surface);
@@ -359,12 +271,12 @@
       color: var(--text-dim);
       display: flex; flex-direction: column; align-items: center;
       gap: 2px;
-      transition: var(--transition-smooth);
+      transition: var(--transition);
     }
     .bn-item.active { color: var(--accent); }
     .bn-ic { font-size: 22px; }
 
-    /* CHAT SCREEN */
+    /* ===== CHAT SCREEN ===== */
     #chatScreen {
       flex: 1; display: none; flex-direction: column;
       overflow: hidden;
@@ -432,7 +344,7 @@
       resize: none;
       line-height: 1.4;
       border: 1.5px solid transparent;
-      transition: var(--transition-smooth);
+      transition: var(--transition);
     }
     .composer textarea:focus { border-color: var(--accent); background: var(--bg-surface-3); box-shadow: 0 0 0 4px var(--accent-glow); }
     .round-btn {
@@ -442,16 +354,16 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 20px;
       flex-shrink: 0;
-      transition: var(--transition-smooth);
+      transition: var(--transition);
     }
     .round-btn:active { transform: scale(0.88); }
-    .round-btn.send { background: var(--accent-gradient); box-shadow: 0 4px 16px rgba(79, 154, 255, 0.35); }
+    .round-btn.send { background: var(--accent-gradient); box-shadow: 0 4px 16px rgba(91, 140, 255, 0.35); }
     .round-btn.recording { background: var(--danger); animation: pulse 1s infinite; }
     @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
 
     .typing-indicator { padding: 4px 18px; font-size: 12px; color: var(--accent); font-style: italic; height: 22px; }
 
-    /* ----- ANALYTICS SCREEN (replaces reels) ----- */
+    /* ===== ANALYTICS SCREEN (replaces reels) ===== */
     #analyticsScreen {
       position: absolute; inset: 0;
       background: var(--bg-primary);
@@ -498,7 +410,7 @@
       display: flex;
       align-items: flex-end;
       justify-content: space-around;
-      height: 120px;
+      height: 130px;
       gap: 6px;
       padding-top: 8px;
     }
@@ -518,8 +430,8 @@
     }
     .bar-label { font-size: 10px; color: var(--text-dim); margin-top: 6px; }
     .alert-box {
-      background: rgba(255, 92, 122, 0.12);
-      border: 1px solid rgba(255, 92, 122, 0.2);
+      background: rgba(255, 107, 122, 0.12);
+      border: 1px solid rgba(255, 107, 122, 0.2);
       border-radius: 16px;
       padding: 14px 16px;
       margin: 12px 0;
@@ -531,7 +443,7 @@
     }
     .alert-box .icon { font-size: 24px; }
 
-    /* CALL OVERLAY (fixed) */
+    /* ===== CALL OVERLAY ===== */
     .call-overlay {
       position: absolute; inset: 0;
       z-index: 60;
@@ -545,15 +457,15 @@
     .local-video { position: absolute; top: 20px; right: 16px; width: 110px; height: 150px; border-radius: 20px; object-fit: cover; background: #111; box-shadow: 0 8px 30px rgba(0,0,0,0.7); border: 2px solid rgba(255,255,255,0.15); z-index: 2; }
     .call-info { position: relative; z-index: 1; text-align: center; color: #fff; margin-bottom: 40px; margin-top: auto; padding-top: 80px; }
     .call-info .call-avatar { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 16px; border: 3px solid rgba(255,255,255,0.15); box-shadow: 0 8px 40px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 700; background: var(--accent-gradient); position: relative; }
-    .call-info .call-avatar .pulse-ring { position: absolute; inset: -8px; border-radius: 50%; border: 2px solid rgba(79, 154, 255, 0.3); animation: ringPulse 2s ease-out infinite; }
+    .call-info .call-avatar .pulse-ring { position: absolute; inset: -8px; border-radius: 50%; border: 2px solid rgba(91, 140, 255, 0.3); animation: ringPulse 2s ease-out infinite; }
     @keyframes ringPulse { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(1.3); opacity: 0; } }
     .call-name { font-size: 26px; font-weight: 700; margin-bottom: 4px; text-shadow: 0 2px 20px rgba(0,0,0,0.3); }
     .call-status { font-size: 15px; opacity: 0.8; background: rgba(0,0,0,0.3); padding: 4px 16px; border-radius: 20px; display: inline-block; backdrop-filter: blur(4px); }
     .call-actions { position: relative; z-index: 2; display: flex; gap: 30px; align-items: center; }
-    .call-btn { width: 68px; height: 68px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 8px 30px rgba(0,0,0,0.4); transition: var(--transition-smooth); border: 2px solid rgba(255,255,255,0.05); }
+    .call-btn { width: 68px; height: 68px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 8px 30px rgba(0,0,0,0.4); transition: var(--transition); border: 2px solid rgba(255,255,255,0.05); }
     .call-btn:active { transform: scale(0.9); }
     .call-btn.accept { background: linear-gradient(135deg, #34d399, #059669); }
-    .call-btn.decline { background: linear-gradient(135deg, #ff5c7a, #dc2626); }
+    .call-btn.decline { background: linear-gradient(135deg, #ff6b7a, #dc2626); }
     .call-btn.secondary { background: rgba(255,255,255,0.08); width: 56px; height: 56px; font-size: 22px; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08); }
     .call-btn.secondary.active-toggle { background: #fff; color: #111; }
 
@@ -565,17 +477,17 @@
     .sheet { background: var(--bg-surface); width: 100%; border-radius: 28px 28px 0 0; padding: 24px 22px; max-height: 80vh; overflow-y: auto; animation: slideUp 0.3s cubic-bezier(0.2, 0.9, 0.3, 1); border-top: 1px solid var(--border-subtle); box-shadow: 0 -12px 40px rgba(0,0,0,0.4); }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     .sheet h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
-    .sheet-item { display: flex; align-items: center; gap: 14px; padding: 14px 4px; font-size: 15px; border-bottom: 1px solid var(--border-subtle); transition: var(--transition-smooth); }
+    .sheet-item { display: flex; align-items: center; gap: 14px; padding: 14px 4px; font-size: 15px; border-bottom: 1px solid var(--border-subtle); transition: var(--transition); }
     .sheet-item:last-child { border-bottom: none; }
     .sheet-item:active { background: rgba(255,255,255,0.04); border-radius: 12px; }
     .sheet-item .ic { font-size: 20px; width: 28px; text-align: center; }
 
     .reaction-picker { display: flex; gap: 12px; justify-content: space-around; padding: 8px 0 16px; font-size: 28px; }
-    .reaction-picker span { transition: var(--transition-smooth); cursor: pointer; }
+    .reaction-picker span { transition: var(--transition); cursor: pointer; }
     .reaction-picker span:active { transform: scale(1.4); }
 
     .gift-picker { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 12px 0; max-height: 350px; overflow-y: auto; }
-    .gift-picker .gift-option { display: flex; flex-direction: column; align-items: center; padding: 12px 8px; border-radius: 14px; background: var(--bg-surface-2); border: 2px solid transparent; transition: var(--transition-smooth); cursor: pointer; min-height: 80px; justify-content: center; }
+    .gift-picker .gift-option { display: flex; flex-direction: column; align-items: center; padding: 12px 8px; border-radius: 14px; background: var(--bg-surface-2); border: 2px solid transparent; transition: var(--transition); cursor: pointer; min-height: 80px; justify-content: center; }
     .gift-picker .gift-option:active { border-color: var(--accent); background: var(--bg-surface-3); transform: scale(0.96); }
     .gift-picker .gift-option .gift-emoji { font-size: 40px; line-height: 1.2; }
     .gift-picker .gift-option .gift-name { font-size: 9px; color: var(--text-dim); margin-top: 4px; text-align: center; }
@@ -643,7 +555,7 @@
     </div>
   </div>
 
-  <!-- ANALYTICS SCREEN (replaces reels) -->
+  <!-- ANALYTICS SCREEN -->
   <div id="analyticsScreen" class="hidden">
     <div class="analytics-topbar">
       <div class="analytics-title">📊 Activity</div>
@@ -772,7 +684,6 @@ let analyticsData = {
   weeklyMessages: [0,0,0,0,0,0,0],
   usageTypes: { text: 0, image: 0, video: 0, voice: 0, gift: 0, call: 0 }
 };
-let lastActivityCheck = Date.now();
 let activityInterval = null;
 const ONE_HOUR = 3600000;
 
@@ -785,82 +696,34 @@ function applyTheme(theme) {
   localStorage.setItem("wg_theme", theme);
 }
 
-// --- GIFTS (same as original) ---
+// --- GIFTS (simplified) ---
 const GIFTS = [
   { emoji: "❤️", name: "Red Heart", category: "Love" },
   { emoji: "💕", name: "Two Hearts", category: "Love" },
-  { emoji: "💗", name: "Growing Heart", category: "Love" },
   { emoji: "💖", name: "Sparkling Heart", category: "Love" },
-  { emoji: "💝", name: "Heart with Ribbon", category: "Love" },
   { emoji: "🌹", name: "Rose", category: "Love" },
-  { emoji: "🌷", name: "Tulip", category: "Love" },
   { emoji: "🌸", name: "Cherry Blossom", category: "Love" },
-  { emoji: "💐", name: "Bouquet", category: "Love" },
   { emoji: "🥰", name: "Smiling Face with Hearts", category: "Love" },
-  { emoji: "😘", name: "Face Blowing a Kiss", category: "Love" },
   { emoji: "🎂", name: "Birthday Cake", category: "Food" },
   { emoji: "🍰", name: "Cake", category: "Food" },
-  { emoji: "🧁", name: "Cupcake", category: "Food" },
   { emoji: "🍫", name: "Chocolate", category: "Food" },
   { emoji: "🍭", name: "Lollipop", category: "Food" },
-  { emoji: "🍩", name: "Donut", category: "Food" },
-  { emoji: "🍪", name: "Cookie", category: "Food" },
   { emoji: "🐶", name: "Dog", category: "Animals" },
   { emoji: "🐱", name: "Cat", category: "Animals" },
-  { emoji: "🐭", name: "Mouse", category: "Animals" },
-  { emoji: "🐹", name: "Hamster", category: "Animals" },
-  { emoji: "🐰", name: "Rabbit", category: "Animals" },
-  { emoji: "🦊", name: "Fox", category: "Animals" },
-  { emoji: "🐻", name: "Bear", category: "Animals" },
   { emoji: "🐼", name: "Panda", category: "Animals" },
-  { emoji: "🐨", name: "Koala", category: "Animals" },
-  { emoji: "🦁", name: "Lion", category: "Animals" },
-  { emoji: "🐯", name: "Tiger", category: "Animals" },
   { emoji: "🦄", name: "Unicorn", category: "Animals" },
   { emoji: "⭐", name: "Star", category: "Nature" },
   { emoji: "🌟", name: "Glowing Star", category: "Nature" },
-  { emoji: "✨", name: "Sparkles", category: "Nature" },
   { emoji: "🌈", name: "Rainbow", category: "Nature" },
-  { emoji: "☀️", name: "Sun", category: "Nature" },
-  { emoji: "🌙", name: "Moon", category: "Nature" },
-  { emoji: "🌊", name: "Wave", category: "Nature" },
   { emoji: "🎉", name: "Party Popper", category: "Celebration" },
   { emoji: "🎊", name: "Confetti Ball", category: "Celebration" },
-  { emoji: "🎈", name: "Balloon", category: "Celebration" },
   { emoji: "🎁", name: "Gift", category: "Celebration" },
-  { emoji: "🎀", name: "Ribbon", category: "Celebration" },
-  { emoji: "🎆", name: "Fireworks", category: "Celebration" },
-  { emoji: "🎇", name: "Sparkler", category: "Celebration" },
   { emoji: "😊", name: "Smiling Face", category: "Emotions" },
-  { emoji: "😃", name: "Happy Face", category: "Emotions" },
-  { emoji: "🤗", name: "Hugging Face", category: "Emotions" },
-  { emoji: "🥳", name: "Party Face", category: "Emotions" },
-  { emoji: "🤩", name: "Starstruck", category: "Emotions" },
-  { emoji: "😍", name: "Heart Eyes", category: "Emotions" },
-  { emoji: "😎", name: "Cool Face", category: "Emotions" },
-  { emoji: "🤔", name: "Thinking Face", category: "Emotions" },
-  { emoji: "😴", name: "Sleepy Face", category: "Emotions" },
-  { emoji: "🥺", name: "Pleading Face", category: "Emotions" },
-  { emoji: "😭", name: "Crying Face", category: "Emotions" },
   { emoji: "😂", name: "Joy Face", category: "Emotions" },
-  { emoji: "🤣", name: "Rolling on Floor", category: "Emotions" },
+  { emoji: "🤩", name: "Starstruck", category: "Emotions" },
   { emoji: "💎", name: "Diamond", category: "Objects" },
   { emoji: "🔮", name: "Crystal Ball", category: "Objects" },
   { emoji: "🏆", name: "Trophy", category: "Objects" },
-  { emoji: "💡", name: "Light Bulb", category: "Objects" },
-  { emoji: "🔑", name: "Key", category: "Objects" },
-  { emoji: "📚", name: "Books", category: "Objects" },
-  { emoji: "🎮", name: "Video Game", category: "Objects" },
-  { emoji: "🧸", name: "Teddy Bear", category: "Objects" },
-  { emoji: "⚽", name: "Soccer Ball", category: "Sports" },
-  { emoji: "🏀", name: "Basketball", category: "Sports" },
-  { emoji: "🏈", name: "Football", category: "Sports" },
-  { emoji: "⚾", name: "Baseball", category: "Sports" },
-  { emoji: "🎾", name: "Tennis", category: "Sports" },
-  { emoji: "🏐", name: "Volleyball", category: "Sports" },
-  { emoji: "🏓", name: "Ping Pong", category: "Sports" },
-  { emoji: "🥊", name: "Boxing Glove", category: "Sports" },
-  { emoji: "🥋", name: "Martial Arts", category: "Sports" },
 ];
 
 // ---- API helper ----
@@ -1809,9 +1672,9 @@ function openChatThemePicker() {
   overlay.onclick = (e) => { if (e.target===overlay) overlay.remove(); };
   const sheet = document.createElement("div");
   sheet.className = "sheet";
-  const themes = [{ id: 'default', name: 'Default', color: '#4f9aff' }, { id: 'cosmic', name: 'Cosmic', color: '#7c5cff' }, { id: 'aurora', name: 'Aurora', color: '#34d399' }, { id: 'sunset', name: 'Sunset', color: '#f472b6' }, { id: 'ocean', name: 'Ocean', color: '#0ea5e9' }, { id: 'sakura', name: 'Sakura', color: '#ec4899' }, { id: 'midnight', name: 'Midnight', color: '#8b5cf6' }];
-  let html = `<h2>🎨 Chat Themes</h2><div class="theme-selector">`;
-  themes.forEach(t => { const active = currentTheme === t.id ? 'active' : ''; html += `<div class="theme-option ${active}" onclick="applyTheme('${t.id}');document.querySelector('.overlay')?.remove();"><div class="theme-preview" style="background:${t.color};"></div><div class="theme-name">${t.name}</div></div>`; });
+  const themes = [{ id: 'default', name: 'Default', color: '#5b8cff' }, { id: 'cosmic', name: 'Cosmic', color: '#8b5cf6' }, { id: 'aurora', name: 'Aurora', color: '#34d399' }, { id: 'sunset', name: 'Sunset', color: '#f472b6' }, { id: 'ocean', name: 'Ocean', color: '#0ea5e9' }, { id: 'sakura', name: 'Sakura', color: '#ec4899' }, { id: 'midnight', name: 'Midnight', color: '#6366f1' }];
+  let html = `<h2>🎨 Chat Themes</h2><div class="theme-selector" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:8px 0;">`;
+  themes.forEach(t => { const active = currentTheme === t.id ? 'active' : ''; html += `<div class="theme-option ${active}" onclick="applyTheme('${t.id}');document.querySelector('.overlay')?.remove();" style="padding:12px 8px;border-radius:14px;background:var(--bg-surface-2);border:2px solid ${active ? 'var(--accent)' : 'transparent'};text-align:center;transition:var(--transition);cursor:pointer;"><div style="width:40px;height:40px;border-radius:12px;margin:0 auto 6px;border:1px solid rgba(255,255,255,0.05);background:${t.color};"></div><div style="font-size:11px;color:var(--text-dim);">${t.name}</div></div>`; });
   html += `</div>`;
   sheet.innerHTML = html;
   overlay.appendChild(sheet);
@@ -1864,8 +1727,8 @@ async function openSettings(){
       <div class="toggle-switch ${ANIMATIONS_ON ? 'on' : ''}" style="width:44px;height:24px;border-radius:14px;background:#2a3a4d;position:relative;flex-shrink:0;transition:.2s;cursor:pointer;" onclick="toggleAnimations()"><div class="knob" style="width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:.2s;"></div></div>
     </div>
     <h2 style="margin-top:22px;">Chat Themes</h2>
-    <div class="theme-selector" style="grid-template-columns:repeat(4,1fr);">
-      ${['default','cosmic','aurora','sunset','ocean','sakura','midnight'].map(t => `<div class="theme-option ${currentTheme === t ? 'active' : ''}" onclick="applyTheme('${t}');document.querySelector('.overlay')?.remove();"><div class="theme-preview" style="background:${t === 'default' ? '#4f9aff' : t === 'cosmic' ? '#7c5cff' : t === 'aurora' ? '#34d399' : t === 'sunset' ? '#f472b6' : t === 'ocean' ? '#0ea5e9' : t === 'sakura' ? '#ec4899' : '#8b5cf6'};"></div><div class="theme-name">${t.charAt(0).toUpperCase() + t.slice(1)}</div></div>`).join('')}
+    <div class="theme-selector" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:8px 0;">
+      ${['default','cosmic','aurora','sunset','ocean','sakura','midnight'].map(t => `<div class="theme-option ${currentTheme === t ? 'active' : ''}" onclick="applyTheme('${t}');document.querySelector('.overlay')?.remove();" style="padding:12px 8px;border-radius:14px;background:var(--bg-surface-2);border:2px solid ${currentTheme === t ? 'var(--accent)' : 'transparent'};text-align:center;transition:var(--transition);cursor:pointer;"><div style="width:40px;height:40px;border-radius:12px;margin:0 auto 6px;border:1px solid rgba(255,255,255,0.05);background:${t === 'default' ? '#5b8cff' : t === 'cosmic' ? '#8b5cf6' : t === 'aurora' ? '#34d399' : t === 'sunset' ? '#f472b6' : t === 'ocean' ? '#0ea5e9' : t === 'sakura' ? '#ec4899' : '#6366f1'};"></div><div style="font-size:11px;color:var(--text-dim);">${t.charAt(0).toUpperCase() + t.slice(1)}</div></div>`).join('')}
     </div>
     <h2 style="margin-top:22px;">Server</h2>
     <div class="settings-row" style="display:block;padding:13px 4px;border-bottom:1px solid var(--border-subtle);"><div>Invite link base address</div><div class="desc" style="font-size:12px;color:var(--text-dim);margin-top:2px;">${PUBLIC_BASE_URL ? escapeHtml(PUBLIC_BASE_URL) : "Not ready yet — the server tries to create one automatically on startup (via cloudflared). Check the server console, or install cloudflared and restart."}</div></div>

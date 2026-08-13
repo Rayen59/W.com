@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -367,16 +369,14 @@
     .composer textarea {
       flex: 1;
       background: var(--bg-surface-2);
-      border-radius: 20px;
+      border-radius: 24px;
       padding: 12px 18px;
       font-size: 14.5px;
-      min-height: 44px;
-      max-height: 220px;
+      max-height: 100px;
       resize: none;
-      line-height: 1.45;
+      line-height: 1.4;
       border: 1.5px solid transparent;
       transition: var(--transition);
-      overflow-y: auto;
     }
     .composer textarea:focus { border-color: var(--accent); background: var(--bg-surface-3); box-shadow: 0 0 0 4px var(--accent-glow); }
     .round-btn {
@@ -614,16 +614,8 @@
         <div class="bar-chart" id="messageChart"></div>
       </div>
       <div class="chart-container">
-        <h3>🔥 24-hour peak activity</h3>
-        <div class="bar-chart" id="hourlyChart" style="height:100px;gap:2px;"></div>
-      </div>
-      <div class="chart-container">
         <h3>📊 Usage distribution</h3>
         <div class="bar-chart" id="usageChart"></div>
-      </div>
-      <div class="chart-container">
-        <h3>📈 Message type breakdown</h3>
-        <div id="typeBreakdown"></div>
       </div>
       <div id="alertContainer"></div>
     </div>
@@ -699,7 +691,7 @@
       <div class="round-btn" onclick="openGiftPicker()">🎁</div>
       <div class="round-btn" onclick="triggerFile('image')">📷</div>
       <div class="round-btn" onclick="triggerFile('video')">🎬</div>
-      <textarea id="msgInput" rows="1" placeholder="Message" oninput="onTypingInput(); autoGrowComposer(this);" onkeydown="onComposerKey(event)"></textarea>
+      <textarea id="msgInput" rows="1" placeholder="Message" oninput="onTypingInput()" onkeydown="onComposerKey(event)"></textarea>
       <div class="round-btn" id="voiceBtn" onmousedown="startRecording()" onmouseup="stopRecording()" ontouchstart="startRecording(event)" ontouchend="stopRecording(event)">🎤</div>
       <div class="round-btn send" onclick="sendTextMessage()">➤</div>
     </div>
@@ -738,7 +730,6 @@ let analyticsData = {
   streak: 0,
   lastActive: null,
   weeklyMessages: [0,0,0,0,0,0,0],
-  hourlyActivity: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
   usageTypes: { text: 0, image: 0, video: 0, voice: 0, gift: 0, call: 0 }
 };
 let activityInterval = null;
@@ -916,15 +907,11 @@ function loadAnalyticsState() {
       const today = new Date().toDateString();
       if (parsed.lastActiveDate === today) {
         analyticsData = parsed;
-        if (!Array.isArray(analyticsData.hourlyActivity) || analyticsData.hourlyActivity.length !== 24) {
-          analyticsData.hourlyActivity = new Array(24).fill(0);
-        }
       } else {
         analyticsData.messagesToday = 0;
         analyticsData.callsToday = 0;
         analyticsData.activeMinutes = 0;
         analyticsData.weeklyMessages = [0,0,0,0,0,0,0];
-        analyticsData.hourlyActivity = new Array(24).fill(0);
         analyticsData.usageTypes = { text: 0, image: 0, video: 0, voice: 0, gift: 0, call: 0 };
         analyticsData.streak = 0;
         analyticsData.lastActive = null;
@@ -967,9 +954,6 @@ function trackActivity(type) {
     analyticsData.messagesToday++;
     const dayIndex = new Date().getDay();
     analyticsData.weeklyMessages[dayIndex] = (analyticsData.weeklyMessages[dayIndex] || 0) + 1;
-    if (!Array.isArray(analyticsData.hourlyActivity) || analyticsData.hourlyActivity.length !== 24) analyticsData.hourlyActivity = new Array(24).fill(0);
-    const hourIndex = new Date().getHours();
-    analyticsData.hourlyActivity[hourIndex] = (analyticsData.hourlyActivity[hourIndex] || 0) + 1;
   } else if (type === 'call') {
     analyticsData.callsToday++;
     analyticsData.usageTypes.call = (analyticsData.usageTypes.call || 0) + 1;
@@ -1045,36 +1029,6 @@ function renderAnalytics() {
         <div class="bar-label">${labels[k] || k}</div>
       </div>
     `).join('');
-  }
-  const hourlyChart = document.getElementById("hourlyChart");
-  if (hourlyChart) {
-    const hours = Array.isArray(analyticsData.hourlyActivity) ? analyticsData.hourlyActivity : new Array(24).fill(0);
-    const maxHour = Math.max(...hours, 1);
-    hourlyChart.innerHTML = hours.map((val, i) => `
-      <div class="bar-item">
-        <div class="bar" style="height: ${Math.max(4, (val/maxHour)*100)}%;"></div>
-        <div class="bar-label">${i % 4 === 0 ? String(i).padStart(2,'0')+':00' : ''}</div>
-      </div>
-    `).join('');
-  }
-  const typeBreakdown = document.getElementById("typeBreakdown");
-  if (typeBreakdown) {
-    const labels = { text: 'Text Messages', image: 'Photos', video: 'Videos', voice: 'Voice Notes', gift: 'Gifts', call: 'Calls' };
-    const types = Object.keys(analyticsData.usageTypes);
-    const total = types.reduce((sum,k) => sum + (analyticsData.usageTypes[k]||0), 0) || 1;
-    typeBreakdown.innerHTML = types.map(k => {
-      const val = analyticsData.usageTypes[k] || 0;
-      const pct = Math.round((val/total)*100);
-      return `
-        <div style="margin-bottom:10px;">
-          <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--text-secondary);margin-bottom:4px;">
-            <span>${labels[k] || k}</span><span>${pct}%</span>
-          </div>
-          <div style="height:8px;border-radius:6px;background:var(--bg-surface-2);overflow:hidden;">
-            <div style="height:100%;width:${pct}%;background:var(--accent-gradient);border-radius:6px;transition:width 0.6s ease;"></div>
-          </div>
-        </div>`;
-    }).join('');
   }
   checkOneHourAlert();
 }
@@ -1399,7 +1353,7 @@ function startEditById(id){
   input.value = m.content || "";
   input.focus();
 }
-function cancelEdit(){ editingMessageId = null; document.getElementById("editBanner")?.classList.add("hidden"); document.getElementById("msgInput").value = ""; resetComposerHeight(); }
+function cancelEdit(){ editingMessageId = null; document.getElementById("editBanner")?.classList.add("hidden"); document.getElementById("msgInput").value = ""; }
 function startReplyById(id){ const m = messageCache[id]; if (m) startReply(m); }
 function startReply(m){
   document.querySelector(".overlay")?.remove();
@@ -1468,7 +1422,6 @@ function sendTextMessage(){
     reply_to_id: replyId
   });
   input.value = "";
-  resetComposerHeight();
   cancelReply();
 }
 
@@ -1516,8 +1469,6 @@ function openGiftPicker(){
   document.getElementById("app").appendChild(overlay);
 }
 function onTypingInput(){ if (!currentChat) return; socket.emit("typing", {chat_type: currentChat.type, target: currentChat.id}); }
-function autoGrowComposer(el){ el.style.height = "auto"; el.style.height = Math.min(el.scrollHeight, 220) + "px"; }
-function resetComposerHeight(){ const el = document.getElementById("msgInput"); if (el) { el.style.height = "auto"; } }
 function triggerFile(kind){
   const input = kind==="image" ? document.getElementById("fileInput") : document.getElementById("fileInputVideo");
   input.onchange = () => uploadAndSend(input.files[0], kind);
@@ -1816,4 +1767,104 @@ async function openSettings(){
       <input type="file" id="avatarUpload" class="hidden" accept="image/*">
     </div>
     <div class="field"><label>Username</label><input id="settingsUsername" value="${escapeHtml(ME ? ME.username : "")}"></div>
-    <div class="field"><label>Email</label><input value="${escapeHtml(ME ? ME.email : "")}" disabled styl
+    <div class="field"><label>Email</label><input value="${escapeHtml(ME ? ME.email : "")}" disabled style="opacity:.6;"></div>
+    <button class="btn-primary" onclick="saveProfile()"><span>Save changes</span></button>
+    <h2 style="margin-top:22px;">Appearance</h2>
+    <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;padding:13px 4px;border-bottom:1px solid var(--border-subtle);font-size:15px;">
+      <div><div>Conversation animations</div><div class="desc" style="font-size:12px;color:var(--text-dim);margin-top:2px;">Calm fade/slide effect when messages appear</div></div>
+      <div class="toggle-switch ${ANIMATIONS_ON ? 'on' : ''}" style="width:44px;height:24px;border-radius:14px;background:#2a3a4d;position:relative;flex-shrink:0;transition:.2s;cursor:pointer;" onclick="toggleAnimations()"><div class="knob" style="width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:.2s;"></div></div>
+    </div>
+    <h2 style="margin-top:22px;">Chat Themes</h2>
+    <div class="theme-selector" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:8px 0;">
+      ${['default','cosmic','aurora','sunset','ocean','sakura','midnight'].map(t => `<div class="theme-option ${currentTheme === t ? 'active' : ''}" onclick="applyTheme('${t}');document.querySelector('.overlay')?.remove();" style="padding:12px 8px;border-radius:14px;background:var(--bg-surface-2);border:2px solid ${currentTheme === t ? 'var(--accent)' : 'transparent'};text-align:center;transition:var(--transition);cursor:pointer;"><div style="width:40px;height:40px;border-radius:12px;margin:0 auto 6px;border:1px solid rgba(255,255,255,0.05);background:${t === 'default' ? '#5b8cff' : t === 'cosmic' ? '#8b5cf6' : t === 'aurora' ? '#34d399' : t === 'sunset' ? '#f472b6' : t === 'ocean' ? '#0ea5e9' : t === 'sakura' ? '#ec4899' : '#6366f1'};"></div><div style="font-size:11px;color:var(--text-dim);">${t.charAt(0).toUpperCase() + t.slice(1)}</div></div>`).join('')}
+    </div>
+    <h2 style="margin-top:22px;">Server</h2>
+    <div class="settings-row" style="display:block;padding:13px 4px;border-bottom:1px solid var(--border-subtle);"><div>Invite link base address</div><div class="desc" style="font-size:12px;color:var(--text-dim);margin-top:2px;">${PUBLIC_BASE_URL ? escapeHtml(PUBLIC_BASE_URL) : "Not ready yet — the server tries to create one automatically on startup (via cloudflared). Check the server console, or install cloudflared and restart."}</div></div>
+    <div class="settings-row" style="display:block;padding:13px 4px;border-bottom:1px solid var(--border-subtle);"><div>Voice &amp; video calls</div><div class="desc" style="font-size:12px;color:var(--text-dim);margin-top:2px;">${window.isSecureContext ? "✅ This connection supports calls." : "⚠️ Calls require HTTPS or localhost."}</div></div>
+    <div class="sheet-item" onclick="viewBlockedList()"><span class="ic">🚫</span> Blocked users</div>
+    <div class="sheet-item" style="color:var(--danger);" onclick="logout()"><span class="ic">🚪</span> Log out</div>
+    <div class="sheet-item" style="color:var(--danger);" onclick="openDeleteAccountSheet()"><span class="ic">⚠️</span> Delete account</div>`;
+  overlay.appendChild(sheet);
+  document.getElementById("app").appendChild(overlay);
+  document.getElementById("avatarUpload").onchange = async (e) => { const fd = new FormData(); fd.append("avatar", e.target.files[0]); const r = await api("/api/profile", {method:"POST", body: fd}); ME = r.user; saveSession(); document.getElementById("settingsAvatar").innerHTML = avatarInner(ME); setAvatarEl(document.getElementById("myAvatar"), ME); };
+}
+function toggleAnimations(){ ANIMATIONS_ON = !ANIMATIONS_ON; localStorage.setItem("wg_animations", ANIMATIONS_ON ? "on" : "off"); const toggle = document.querySelector(".toggle-switch"); if (toggle) toggle.classList.toggle("on", ANIMATIONS_ON); }
+async function saveProfile(){ const username = document.getElementById("settingsUsername").value.trim(); const fd = new FormData(); fd.append("username", username); const r = await api("/api/profile", {method:"POST", body: fd}); ME = r.user; saveSession(); setAvatarEl(document.getElementById("myAvatar"), ME); showToast("Profile updated"); document.querySelector(".overlay")?.remove(); }
+function openDeleteAccountSheet(){ document.querySelector(".overlay")?.remove(); const overlay = document.createElement("div"); overlay.className = "overlay"; overlay.onclick = (e) => { if (e.target===overlay) overlay.remove(); }; const sheet = document.createElement("div"); sheet.className = "sheet"; sheet.innerHTML = `<h2 style="color:var(--danger);">Delete account</h2><div class="settings-row desc" style="border:none;line-height:1.6;padding:0 0 16px;color:var(--text-dim);font-size:13px;">This permanently deletes your account and everything you've posted — messages, reels, comments and reactions. This cannot be undone: your old email and password will stop working immediately, and the only way to use Wavegram again is signing up as a brand new account. Nobody will be able to message you either, because the account will no longer exist.</div><div class="field"><label>Confirm your password</label><input type="password" id="deleteAccountPassword" placeholder="••••••••"></div><button class="btn-primary" style="background:var(--danger);box-shadow:none;" onclick="confirmDeleteAccount()"><span>Permanently delete my account</span></button>`; overlay.appendChild(sheet); document.getElementById("app").appendChild(overlay); }
+async function confirmDeleteAccount(){ const password = document.getElementById("deleteAccountPassword").value; if (!password) { showToast("Enter your password to confirm"); return; } try { await api("/api/account", {method:"DELETE", body: JSON.stringify({password})}); document.querySelector(".overlay")?.remove(); showToast("Account deleted"); localStorage.removeItem("wg_token"); localStorage.removeItem("wg_me"); TOKEN = ""; ME = null; if (socket) socket.disconnect(); if (activityInterval) clearInterval(activityInterval); showAuth(); } catch(e){ showToast(e.message); } }
+async function viewBlockedList(){ document.querySelector(".overlay")?.remove(); const r = await api("/api/blocked"); const overlay = document.createElement("div"); overlay.className = "overlay"; overlay.onclick = (e) => { if (e.target===overlay) overlay.remove(); }; const sheet = document.createElement("div"); sheet.className = "sheet"; let html = "<h2>Blocked users</h2>"; if (!r.users || r.users.length===0) html += "<div class='empty-state'>No blocked users</div>"; if (r.users) { r.users.forEach(u => { html += `<div class="sheet-item">${escapeHtml(u.username)}<button style="margin-left:auto;color:var(--accent);font-size:13px;" onclick="unblockUser(${u.id})">Unblock</button></div>`; }); } sheet.innerHTML = html; overlay.appendChild(sheet); document.getElementById("app").appendChild(overlay); }
+async function unblockUser(id){ await api("/api/unblock", {method:"POST", body: JSON.stringify({user_id:id})}); viewBlockedList(); }
+function showToast(msg){ const t = document.createElement("div"); t.className = "toast"; t.textContent = msg; document.getElementById("app").appendChild(t); setTimeout(() => t.remove(), 2800); }
+
+// ---- Join-via-link ----
+window.addEventListener("load", () => {
+  const params = new URLSearchParams(window.location.search);
+  const joinToken = params.get("join");
+  if (joinToken && TOKEN) setTimeout(() => promptJoinGroup(joinToken), 600);
+  else if (joinToken) localStorage.setItem("wg_pending_join", joinToken);
+});
+function promptJoinGroup(token){ const overlay = document.createElement("div"); overlay.className = "overlay"; const sheet = document.createElement("div"); sheet.className = "sheet"; sheet.innerHTML = `<h2>Join group</h2><div class="field"><label>Group password (if any)</label><input type="password" id="joinPass"></div><button class="btn-primary" onclick="submitJoinGroup('${token}')"><span>Join</span></button>`; overlay.appendChild(sheet); document.getElementById("app").appendChild(overlay); }
+async function submitJoinGroup(token){ const password = document.getElementById("joinPass").value; try { await api("/api/groups/join/"+token, {method:"POST", body: JSON.stringify({password})}); document.querySelector(".overlay")?.remove(); showToast("Joined group"); switchTab("groups"); } catch(e){ showToast(e.message); } }
+
+// ==================== CALLS (WebRTC) - FIXED ====================
+let pc = null;
+let localStream = null;
+let remoteStream = null;
+let currentCallTargetId = null;
+let isVideoCall = false;
+let isMuted = false;
+let isCameraOff = false;
+let callStartTime = null;
+let callTimerInterval = null;
+let isCallActive = false;
+let callRecordSaved = false;
+
+const rtcConfig = { iceServers: [ { urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }, { urls: "stun:stun2.l.google.com:19302" }, { urls: "stun:stun3.l.google.com:19302" }, { urls: "stun:stun4.l.google.com:19302" } ], iceCandidatePoolSize: 10 };
+
+async function startCall(type){
+  console.log("🔵 startCall called with type:", type);
+  if (!window.isSecureContext) { showToast("Calls require HTTPS or localhost"); return; }
+  if (!currentChat || currentChat.type !== "dm") { showToast("Only direct messages support calls"); return; }
+  if (isCallActive) { showToast("Already in a call"); return; }
+  if (!socket || !socket.connected) { showToast("Not connected to server"); return; }
+  isVideoCall = (type === "video");
+  currentCallTargetId = currentChat.id;
+  callStartTime = Date.now();
+  callRecordSaved = false;
+  isCallActive = true;
+  document.getElementById("callActionsIncoming").classList.add("hidden");
+  document.getElementById("callActionsActive").classList.remove("hidden");
+  document.getElementById("callOverlay").classList.remove("hidden");
+  document.getElementById("callStatus").textContent = "Calling...";
+  document.getElementById("callName").textContent = currentChat.name;
+  setCallAvatarEl(document.getElementById("callAvatar"), {username: currentChat.name, avatar: currentChat.avatar});
+  try {
+    const constraints = { audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: isVideoCall ? { width: { ideal: 640 }, height: { ideal: 480 } } : false };
+    localStream = await navigator.mediaDevices.getUserMedia(constraints);
+    const lv = document.getElementById("localVideo");
+    if (isVideoCall) { lv.srcObject = localStream; lv.classList.remove("hidden"); } else { lv.classList.add("hidden"); }
+    createPeerConnection();
+    localStream.getTracks().forEach(track => { if (pc) { pc.addTrack(track, localStream); } });
+    const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: isVideoCall });
+    await pc.setLocalDescription(offer);
+    socket.emit("call_offer", { target: currentCallTargetId, offer: offer, video: isVideoCall });
+    startCallTimer();
+  } catch(err){ console.error("Error starting call:", err); showToast("Could not start call: " + err.message); endCall(true); }
+}
+function startCallTimer() { if (callTimerInterval) clearInterval(callTimerInterval); callTimerInterval = setInterval(() => { if (callStartTime) { const elapsed = Math.floor((Date.now() - callStartTime) / 1000); const mins = Math.floor(elapsed / 60); const secs = elapsed % 60; document.getElementById("callStatus").textContent = `${mins}:${secs.toString().padStart(2, '0')}`; } }, 1000); }
+async function handleCallOffer(data){ console.log("📥 Call offer received from:", data.from_user_id); if (isCallActive || currentCallTargetId) { socket.emit("call_reject", {target: data.from_user_id}); return; } if (!data.from_user_id) return; currentCallTargetId = data.from_user_id; isVideoCall = data.video || false; callStartTime = Date.now(); callRecordSaved = false; isCallActive = true; const user = {username: data.from_username || "Unknown", avatar: data.from_avatar || null}; setCallAvatarEl(document.getElementById("callAvatar"), user); document.getElementById("callName").textContent = user.username; document.getElementById("callStatus").textContent = isVideoCall ? "📹 Incoming video call..." : "📞 Incoming voice call..."; document.getElementById("callActionsIncoming").classList.remove("hidden"); document.getElementById("callActionsActive").classList.add("hidden"); document.getElementById("callOverlay").classList.remove("hidden"); window._incomingOffer = data.offer; window._callerInfo = user; if (navigator.vibrate) navigator.vibrate([200, 100, 200]); }
+async function acceptCall(){ console.log("✅ Accepting call"); if (!window._incomingOffer) { showToast("No incoming call to accept"); return; } document.getElementById("callActionsIncoming").classList.add("hidden"); document.getElementById("callActionsActive").classList.remove("hidden"); document.getElementById("callStatus").textContent = "Connecting..."; try { const constraints = { audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: isVideoCall ? { width: { ideal: 640 }, height: { ideal: 480 } } : false }; localStream = await navigator.mediaDevices.getUserMedia(constraints); const lv = document.getElementById("localVideo"); if (isVideoCall) { lv.srcObject = localStream; lv.classList.remove("hidden"); } else { lv.classList.add("hidden"); } createPeerConnection(); localStream.getTracks().forEach(track => { if (pc) { pc.addTrack(track, localStream); } }); await pc.setRemoteDescription(new RTCSessionDescription(window._incomingOffer)); const answer = await pc.createAnswer(); await pc.setLocalDescription(answer); socket.emit("call_answer", {target: currentCallTargetId, answer: answer}); startCallTimer(); trackActivity('call'); } catch(err){ console.error("Error accepting call:", err); showToast("Failed to accept call: " + err.message); endCall(true); } }
+async function handleCallAnswer(data){ if (!pc) return; try { await pc.setRemoteDescription(new RTCSessionDescription(data.answer)); document.getElementById("callStatus").textContent = "Connected"; startCallTimer(); } catch(e){ console.error("Error handling call answer:", e); } }
+async function handleRemoteIce(data){ if (!pc || !data.candidate) return; try { await pc.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch(e){ console.warn("Failed to add ICE candidate:", e); } }
+function handleCallReject(data){ showToast("Call declined"); if (!callRecordSaved) { saveCallRecord("declined"); callRecordSaved = true; } endCall(true); }
+function handleRemoteEnd(data){ showToast("Call ended"); if (!callRecordSaved && callStartTime) { saveCallRecord("completed"); callRecordSaved = true; } endCall(true); }
+function declineCall(){ if (currentCallTargetId) socket.emit("call_reject", {target: currentCallTargetId}); if (!callRecordSaved) { saveCallRecord("declined"); callRecordSaved = true; } endCall(true); }
+function endCall(silent){ if (callTimerInterval) { clearInterval(callTimerInterval); callTimerInterval = null; } if (!silent && currentCallTargetId && isCallActive) { socket.emit("call_end", {target: currentCallTargetId}); if (!callRecordSaved && callStartTime) { saveCallRecord("completed"); callRecordSaved = true; } } if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; } if (pc) { pc.close(); pc = null; } currentCallTargetId = null; isCallActive = false; callStartTime = null; document.getElementById("callOverlay").classList.add("hidden"); document.getElementById("remoteVideo").classList.add("hidden"); document.getElementById("localVideo").classList.add("hidden"); document.getElementById("cameraBtn").classList.add("hidden"); }
+function saveCallRecord(status) { if (!currentChat || currentChat.type !== "dm") return; const callType = isVideoCall ? "video" : "audio"; const duration = callStartTime ? Math.floor((Date.now() - callStartTime) / 1000) : 0; const content = `${callType}:${status}:${duration}`; const clientId = makeClientId(); const m = { id: clientId, chat_type: "dm", chat_id: null, sender_id: ME.id, sender_name: ME.username, sender_avatar: ME.avatar, msg_type: "call", content: content, media_path: "", timestamp: Date.now()/1000, deleted: false, reactions: [], client_id: clientId }; const body = document.getElementById("messagesBody"); if (body) { const row = buildBubble(m); row.classList.add("pending"); row.dataset.id = clientId; body.appendChild(row); body.scrollTop = body.scrollHeight; } socket.emit("send_message", { chat_type: "dm", target: currentChat.id, msg_type: "call", content: content, client_id: clientId, reply_to_id: null }); trackMessageType('call'); trackActivity('call'); }
+function createPeerConnection(){ pc = new RTCPeerConnection(rtcConfig); pc.onicecandidate = (event) => { if (event.candidate && currentCallTargetId && socket) { socket.emit("call_ice_candidate", {target: currentCallTargetId, candidate: event.candidate}); } }; pc.ontrack = (event) => { remoteStream = event.streams[0]; const rv = document.getElementById("remoteVideo"); rv.srcObject = remoteStream; rv.classList.remove("hidden"); document.getElementById("callStatus").textContent = "Connected"; document.getElementById("cameraBtn").classList.toggle("hidden", !isVideoCall); }; pc.oniceconnectionstatechange = () => { const state = pc?.iceConnectionState; if (state === "failed") { showToast("Connection failed"); if (!callRecordSaved) { saveCallRecord("missed"); callRecordSaved = true; } endCall(true); } if (state === "connected") document.getElementById("callStatus").textContent = "Connected"; if (state === "disconnected") { showToast("Disconnected"); if (!callRecordSaved) { saveCallRecord("missed"); callRecordSaved = true; } endCall(true); } }; }
+function toggleMute(){ if (!localStream) return; isMuted = !isMuted; localStream.getAudioTracks().forEach(t => t.enabled = !isMuted); const btn = document.getElementById("muteBtn"); btn.classList.toggle("active-toggle", isMuted); btn.textContent = isMuted ? "🔇" : "🎤"; }
+function toggleCamera(){ if (!localStream) return; isCameraOff = !isCameraOff; localStream.getVideoTracks().forEach(t => t.enabled = !isCameraOff); const btn = document.getElementById("cameraBtn"); btn.classList.toggle("active-toggle", isCameraOff); btn.textContent = isCameraOff ? "🎦" : "📷"; }
+</script>
+</body>
+</html>
+```
